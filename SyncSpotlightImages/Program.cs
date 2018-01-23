@@ -11,17 +11,26 @@ namespace SyncSpotlightImages {
     class Program {
         static void Main(string[] args) {
 
-            var sourceDir = @"C:\Users\gert.ASF\AppData\Local\Packages\Microsoft.Windows.ContentDeliveryManager_cw5n1h2txyewy\LocalState\Assets";
-            var destDir = @"C:\Users\gert.ASF\Wallpapers";
+            var sourceDir = @"C:\Users\gert\AppData\Local\Packages\Microsoft.Windows.ContentDeliveryManager_cw5n1h2txyewy\LocalState\Assets";
+            var destDir = @"C:\Users\gert\OneDrive\Wallpapers";
 
             // Remove old files
             var currentFiles = Directory.GetFiles(destDir).Select(s => new FileInfo(s));
             foreach(var current in currentFiles) {
+                if (current.Name.Contains(".archive.")) continue;
                 // Check if counterpart exists
                 var orig = Path.Combine(sourceDir, Path.GetFileNameWithoutExtension(current.Name));
                 if (!File.Exists(orig)) {
-                    Console.WriteLine($"Remove old file - {current.Name}");
-                    current.Delete();
+                    if (current.Name.Contains(".junk")) {
+                        // Console.WriteLine($"Remove old file - {current.Name}");
+                        current.Delete();
+                    } else if (!current.Name.Contains(".archive.")) {
+                        // Rename to archive
+                        Console.WriteLine($"Archive - {current.Name}");
+                        var newName = Path.ChangeExtension(current.FullName, ".archive.jpg");
+                        if (File.Exists(newName)) File.Delete(newName);
+                        current.MoveTo(Path.ChangeExtension(current.FullName, ".archive.jpg"));
+                    }
                 }
             }
 
